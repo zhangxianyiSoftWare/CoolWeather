@@ -2,6 +2,7 @@ package com.coolweather.android;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,11 +47,11 @@ public class ChooseAreaFragment extends Fragment
     /*
     * create some control
     * */
-    private ProgressDialog progress_dialog;
-    private TextView title_text;
-    private Button back_button;
-    private ListView list_view;
-    private ArrayAdapter<String> adapters;
+    private ProgressDialog progress_dialog = null;
+    private TextView title_text =null;
+    private Button back_button =null;
+    private ListView list_view = null;
+    private ArrayAdapter<String> adapters = null;
     private List<String> data_list = new ArrayList<>();
 
     /*
@@ -129,6 +130,7 @@ public class ChooseAreaFragment extends Fragment
         back_button.setVisibility(View.GONE);
         //user LitePal query interface from databases read province data
         province_list = DataSupport.findAll(Province.class);
+        Log.d("province text msg : ","xxxxxxxxsize"+province_list.size());
         if(province_list.size() > 0)
         {
             //read and show in fragment
@@ -148,6 +150,7 @@ public class ChooseAreaFragment extends Fragment
             String address = "http://guolin.tech/api/china";
             queryFromServer(address,"province");
         }
+        Log.d("province all name",""+data_list.toString());
     }
 
     /*
@@ -159,7 +162,7 @@ public class ChooseAreaFragment extends Fragment
         //disvisibilit vack button
         back_button.setVisibility(View.VISIBLE);
         //user LitePal query interface from databases read province data
-        city_list = DataSupport.where("provinceId=?",String.valueOf(selected_province.getId())).find(City.class);
+        city_list = DataSupport.where("provinceCode=?",String.valueOf(selected_province.getId())).find(City.class);
         if (city_list.size() > 0)
         {
             data_list.clear();
@@ -175,7 +178,7 @@ public class ChooseAreaFragment extends Fragment
         else
         {
             int provinceCode = selected_province.getProvinceCode();
-            String address = "http://guolin.tech/api/china" + provinceCode;
+            String address = "http://guolin.tech/api/china/" + provinceCode;
             queryFromServer(address,"city");
         }
     }
@@ -188,7 +191,7 @@ public class ChooseAreaFragment extends Fragment
         title_text.setText(selected_city.getCityName());
         //disvisibilit vack button
         back_button.setVisibility(View.VISIBLE);
-        county_list = DataSupport.where("cityId=?",String.valueOf(selected_city.getId())).find(County.class);
+        county_list = DataSupport.where("cityid=?",String.valueOf(selected_city.getId())).find(County.class);
         if(county_list.size() > 0)
         {
             data_list.clear();
@@ -204,7 +207,7 @@ public class ChooseAreaFragment extends Fragment
         {
             int provinceCode = selected_province.getProvinceCode();
             int cityCode = selected_city.getCityCode();
-            String address = "http://guolin.tech/api/china" +provinceCode+"/"+cityCode;
+            String address = "http://guolin.tech/api/china/" +provinceCode+"/"+cityCode;
             queryFromServer(address,"county");
         }
     }
@@ -213,11 +216,13 @@ public class ChooseAreaFragment extends Fragment
     * */
     private void queryFromServer(String address,final String type)
     {
+        Log.d("address  : type","\tsuccess\t"+address+"\txx: "+type);
         showProgressDialog();
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 //deal load failed event
+                Log.d("querach failed","\tfailed");
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -231,6 +236,7 @@ public class ChooseAreaFragment extends Fragment
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 //recv response data and deal
                 String responseText= response.body().string();
+
                 boolean result = false;
                 if ("province".equals(type))
                 {
@@ -244,7 +250,7 @@ public class ChooseAreaFragment extends Fragment
                 {
                     result = Utility.handleCountyResponse(responseText,selected_city.getId());
                 }
-
+                Log.d("handler text response: ","  "+result);
                 if(result)
                 {
                     getActivity().runOnUiThread(new Runnable() {
@@ -268,6 +274,7 @@ public class ChooseAreaFragment extends Fragment
                 }
             }
         });
+
     }
 
     /*
@@ -279,6 +286,7 @@ public class ChooseAreaFragment extends Fragment
         {
             progress_dialog = new ProgressDialog(getActivity());
             progress_dialog.setMessage("正在加载中");
+            Log.d("show process dialog","\tloading.....");
             progress_dialog.setCanceledOnTouchOutside(false);
         }
     }

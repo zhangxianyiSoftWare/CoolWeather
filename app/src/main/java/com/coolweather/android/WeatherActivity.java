@@ -3,6 +3,8 @@ package com.coolweather.android;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -45,12 +47,20 @@ public class WeatherActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //grater the ui
+        if(Build.VERSION.SDK_INT >= 21 )
+        {
+            View decorView = getWindow().getDecorView();
+            //change the system ui
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            //set visible not
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
         setContentView(R.layout.activity_weather);
         //init all control
         initControl();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
         //set background image
         String bingPic = prefs.getString("bing_pic",null);
         if (bingPic != null)
@@ -60,7 +70,7 @@ public class WeatherActivity extends AppCompatActivity {
         else
         {
             //if not readed then load
-            locaBingPic();
+            loadBingPic();
         }
         String weatherString = prefs.getString("weather",null);
         if(weatherString != null)
@@ -94,6 +104,19 @@ public class WeatherActivity extends AppCompatActivity {
 
         bingPicImg = findViewById(R.id.bing_pic_img);
 
+    }
+
+    private void checkBuildVersion()
+    {
+        //android 5.0
+        if(Build.VERSION.SDK_INT >=21)
+        {
+            View decorView = getWindow().getDecorView();
+            //change the system ui
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            //set visible not
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
     }
 
     public void requestWeather(final String weatherId)
@@ -138,7 +161,7 @@ public class WeatherActivity extends AppCompatActivity {
             }
         });
         //load picture background
-        locaBingPic();
+        loadBingPic();
     }
 
     /*
@@ -191,8 +214,9 @@ public class WeatherActivity extends AppCompatActivity {
         //set the weather info into visible
         weatherLayout.setVisibility(View.VISIBLE);
     }
-
-    private void locaBingPic()
+    /*
+    * load every day picture*/
+    private void loadBingPic()
     {
         String requestBingPic = "http://guolin.tech/api/bing_pic";
         HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
@@ -206,6 +230,7 @@ public class WeatherActivity extends AppCompatActivity {
                 //get picture reference
                 final String bingPic = response.body().string();
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+                editor.putString("bing_pic",bingPic);
                 //save picture background into share preferences
                 editor.apply();
                 runOnUiThread(new Runnable() {

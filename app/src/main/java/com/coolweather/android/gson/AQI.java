@@ -7,7 +7,7 @@ public class AQI
 
     public class  AQICity{
         //air quality index
-        public String api;
+        public String aqi;
         //pm 2.5 concertration
         public String pm25;
     }

@@ -48,14 +48,7 @@ public class WeatherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //grater the ui
-        if(Build.VERSION.SDK_INT >= 21 )
-        {
-            View decorView = getWindow().getDecorView();
-            //change the system ui
-            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            //set visible not
-            getWindow().setStatusBarColor(Color.TRANSPARENT);
-        }
+        checkBuildVersion();
         setContentView(R.layout.activity_weather);
         //init all control
         initControl();
